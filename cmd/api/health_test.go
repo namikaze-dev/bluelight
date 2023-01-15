@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -11,7 +12,7 @@ func TestHealth(t *testing.T) {
 	rr := httptest.NewRecorder()
 	r, err := http.NewRequest(http.MethodGet, "/v1/health", nil)
 	if err != nil {
-		t.Fatal("unexpected error", err)
+		t.Fatal(err)
 	}
 
 	app := &application{
@@ -29,6 +30,20 @@ func TestHealth(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := `{"status": "available", "environment": "development", "version": "1.0.0"}`
-	assertEqual(t, string(body), want)
+
+	var got map[string]string
+	err = json.Unmarshal(body, &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := map[string]string{
+		"status":      "available",
+		"environment": "development",
+		"version":     "1.0.0",
+	}
+
+	assertEqual(t, got["status"], want["status"])
+	assertEqual(t, got["environment"], want["environment"])
+	assertEqual(t, got["version"], want["version"])
 }
