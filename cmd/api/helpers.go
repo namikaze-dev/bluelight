@@ -9,6 +9,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+type envelope map[string]interface{}
+
 var (
 	ErrInvalidIdParam = errors.New("invalid id parameter")
 )
