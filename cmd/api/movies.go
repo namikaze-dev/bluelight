@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/namikaze-dev/bluelight/internal/models"
+	"github.com/namikaze-dev/bluelight/internal/validator"
 )
 
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
@@ -44,5 +44,21 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	fmt.Fprintf(w, "%+v\n", input)
+	movie := &models.Movie{
+		Title:   input.Title,
+		Year:    input.Year,
+		Runtime: input.Runtime,
+		Genres:  input.Genres,
+	}
+
+	v := validator.New()
+	if models.ValidateMovie(v, movie); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"movie": movie}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
