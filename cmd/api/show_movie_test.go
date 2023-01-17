@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/namikaze-dev/bluelight/internal/models"
 )
 
 func TestShowMovie(t *testing.T) {
@@ -30,18 +28,25 @@ func TestShowMovie(t *testing.T) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatal(err)
-		return
 	}
 
-	var got models.Movie
-	err = json.Unmarshal(body, &got)
+	var js map[string]interface{}
+	err = json.Unmarshal(body, &js)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	want := models.Movie{
-		ID: 1,
+	js2, ok := js["movie"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected movie, got %v", js["movie"])
 	}
 
-	assertEqual(t, got.ID, want.ID)
+	got, ok := js2["id"].(float64)
+	if !ok {
+		t.Errorf("%T", js2["id"])
+		t.Fatalf("expected id of float6464, got %v", js2["id"])
+	}
+
+	var want float64 = 1
+	assertEqual(t, got, want)
 }

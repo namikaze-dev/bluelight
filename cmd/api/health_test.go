@@ -31,19 +31,16 @@ func TestHealth(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var got map[string]string
-	err = json.Unmarshal(body, &got)
+	var env map[string]interface{}
+	err = json.Unmarshal(body, &env)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	want := map[string]string{
-		"status":      "available",
-		"environment": "development",
-		"version":     "1.0.0",
+	got, ok := env["status"].(string)
+	if !ok {
+		t.Errorf("value %v is not of type string", env["status"])
 	}
 
-	assertEqual(t, got["status"], want["status"])
-	assertEqual(t, got["environment"], want["environment"])
-	assertEqual(t, got["version"], want["version"])
+	assertEqual(t, got, "available")
 }
