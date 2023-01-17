@@ -30,23 +30,16 @@ func TestShowMovie(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var js map[string]interface{}
-	err = json.Unmarshal(body, &js)
+	var got struct {
+		Movie struct {
+			ID int64 `json:"id"`
+		} `json:"movie"`
+	}
+	err = json.Unmarshal(body, &got)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	js2, ok := js["movie"].(map[string]interface{})
-	if !ok {
-		t.Fatalf("expected movie, got %v", js["movie"])
-	}
-
-	got, ok := js2["id"].(float64)
-	if !ok {
-		t.Errorf("%T", js2["id"])
-		t.Fatalf("expected id of float6464, got %v", js2["id"])
-	}
-
-	var want float64 = 1
-	assertEqual(t, got, want)
+	var want int64 = 1
+	assertEqual(t, got.Movie.ID, want)
 }
