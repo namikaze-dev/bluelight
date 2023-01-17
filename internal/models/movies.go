@@ -18,7 +18,6 @@ type Movie struct {
 	Version   int32     `json:"version"`
 }
 
-
 func (r Runtime) MarshalJSON() ([]byte, error) {
 	jsonValue := fmt.Sprintf("%d mins", r)
 	quotedJSONValue := strconv.Quote(jsonValue)
