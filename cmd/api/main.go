@@ -30,7 +30,7 @@ type config struct {
 type application struct {
 	config config
 	logger *log.Logger
-	models models.Models
+	models *models.Models
 }
 
 func main() {
