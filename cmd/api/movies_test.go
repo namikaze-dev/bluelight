@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/namikaze-dev/bluelight/internal/models"
 )
 
 func TestShowMovie(t *testing.T) {
@@ -14,11 +16,24 @@ func TestShowMovie(t *testing.T) {
 		config: config{
 			env: "development",
 		},
+		models: models.NewMockModels(),
 	}
 
 	ts := httptest.NewServer(app.routes())
 	defer ts.Close()
-	resp, err := ts.Client().Get(ts.URL + "/v1/movies/1")
+
+	// 10 for id of movie 
+	resp, err := ts.Client().Get(ts.URL + "/v1/movies/10")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	// movie of id 10 should not exist
+	assertEqual(t, resp.StatusCode, http.StatusNotFound)
+
+	// 1 for id of movie, already available by default
+	resp, err = ts.Client().Get(ts.URL + "/v1/movies/1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,6 +65,7 @@ func TestCreateMovie(t *testing.T) {
 		config: config{
 			env: "development",
 		},
+		models: models.NewMockModels(),
 	}
 
 	ts := httptest.NewServer(app.routes())
@@ -116,7 +132,7 @@ func TestCreateMovie(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer resp.Body.Close()
-	assertEqual(t, resp.StatusCode, http.StatusOK)
+	assertEqual(t, resp.StatusCode, http.StatusCreated)
 
 	// check response body
 	body, err := io.ReadAll(resp.Body)
