@@ -169,14 +169,11 @@ func TestUpdateMovie(t *testing.T) {
 	defer ts.Close()
 
 	var input struct {
-		Title   string   `json:"title"`
 		Year    int      `json:"year"`
 		Runtime string   `json:"runtime"`
-		Genres  []string `json:"genres"`
 	}
 
-	input.Title = "undead"
-	input.Genres = []string{"action", "horror"}
+	// partial updates
 	input.Year = 2020
 	input.Runtime = "100 mins"
 	b, err := json.Marshal(input)
@@ -186,7 +183,7 @@ func TestUpdateMovie(t *testing.T) {
 
 	rd := bytes.NewReader(b)
 	// movie with id 1 available by default
-	req, err := http.NewRequest(http.MethodPut, ts.URL+"/v1/movies/1", rd)
+	req, err := http.NewRequest(http.MethodPatch, ts.URL+"/v1/movies/1", rd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -217,7 +214,6 @@ func TestUpdateMovie(t *testing.T) {
 
 	assertEqual(t, got.Movie.Runtime, input.Runtime)
 	assertEqual(t, got.Movie.Year, input.Year)
-	assertEqual(t, got.Movie.Title, input.Title)
 }
 
 func TestDeleteMovie(t *testing.T) {
