@@ -50,6 +50,16 @@ func (m *MockMovieModel) Delete(id int64) error {
 		return ErrRecordNotFound
 	}
 
+	var found bool
+	for k := range m.MoviesDB {
+		if k == id {
+			found = true
+		}
+	}
+	if !found {
+		return ErrRecordNotFound
+	}
+
 	delete(m.MoviesDB, id)
 
 	return nil
