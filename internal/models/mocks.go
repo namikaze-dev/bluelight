@@ -1,11 +1,24 @@
 package models
 
-type MockMovieModel struct{
-	Movies map[int64]Movie
+type MockMovieModel struct {
+	MoviesDB map[int64]Movie
+}
+
+func DefaultMockMovieModel() *MockMovieModel {
+	mm := MockMovieModel{MoviesDB: map[int64]Movie{}}
+	mm.MoviesDB[1] = Movie{
+		ID:      1,
+		Title:   "mock movie",
+		Year:    2000,
+		Runtime: 100,
+		Genres:  []string{"mock genre1", "mock genre2"},
+		Version: 1,
+	}
+	return &mm
 }
 
 func (m *MockMovieModel) Insert(movie *Movie) error {
-	m.Movies[movie.ID] = *movie
+	m.MoviesDB[movie.ID] = *movie
 	return nil
 }
 
@@ -14,7 +27,7 @@ func (m *MockMovieModel) Get(id int64) (*Movie, error) {
 		return nil, ErrRecordNotFound
 	}
 
-	movie, ok := m.Movies[id]
+	movie, ok := m.MoviesDB[id]
 	if !ok {
 		return nil, ErrRecordNotFound
 	}
@@ -23,21 +36,21 @@ func (m *MockMovieModel) Get(id int64) (*Movie, error) {
 }
 
 func (m *MockMovieModel) Update(movie *Movie) error {
-	if int(movie.ID) < 0 || int(movie.ID) > len(m.Movies) {
+	if int(movie.ID) < 0 {
 		return ErrRecordNotFound
 	}
 
 	movie.Version++
-	m.Movies[movie.ID] = *movie
+	m.MoviesDB[movie.ID] = *movie
 	return nil
 }
 
 func (m *MockMovieModel) Delete(id int64) error {
-	if int(id) < 0 || int(id) > len(m.Movies) {
+	if int(id) < 0 {
 		return ErrRecordNotFound
 	}
 
-	delete(m.Movies, id)
+	delete(m.MoviesDB, id)
 
 	return nil
 }
