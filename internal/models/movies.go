@@ -155,18 +155,3 @@ func ValidateMovie(v *validator.Validator, movie *Movie) {
 	v.Check(len(movie.Genres) <= 5, "genres", "must not contain more than 5 genres")
 	v.Check(validator.Unique(movie.Genres), "genres", "must not contain duplicate values")
 }
-
-type MockMovieModel struct{}
-
-func (m *MockMovieModel) Insert(movie *Movie) error {
-	return nil
-}
-func (m *MockMovieModel) Get(id int64) (*Movie, error) {
-	return nil, nil
-}
-func (m *MockMovieModel) Update(movie *Movie) error {
-	return nil
-}
-func (m *MockMovieModel) Delete(id int64) error {
-	return nil
-}

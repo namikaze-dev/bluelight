@@ -26,6 +26,6 @@ func NewModels(db *sql.DB) *Models {
 
 func NewMockModels() *Models {
 	return &Models{
-		Movies: &MockMovieModel{},
+		Movies: &MockMovieModel{Movies: map[int64]Movie{}},
 	}
 }
