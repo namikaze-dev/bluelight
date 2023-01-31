@@ -35,6 +35,10 @@ func (m *MockMovieModel) Get(id int64) (*Movie, error) {
 	return &movie, nil
 }
 
+func (m *MockMovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, error) {
+	return nil, nil
+}
+
 func (m *MockMovieModel) Update(movie *Movie) error {
 	if int(movie.ID) < 0 {
 		return ErrRecordNotFound
