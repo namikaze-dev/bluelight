@@ -197,7 +197,12 @@ func (app *application) listMoviesHandler(w http.ResponseWriter, r *http.Request
 
 	movies, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, models.ErrInvalidSortColumn):
+			app.badRequestResponse(w, r, err)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 
