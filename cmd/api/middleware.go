@@ -1,12 +1,16 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/namikaze-dev/bluelight/internal/validator"
+	"github.com/namikaze-dev/bluelight/internal/models"
 	"golang.org/x/time/rate"
 )
 
@@ -73,6 +77,46 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 
 			mu.Unlock()
 		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Vary", "Authorization")
+
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			r = app.contextSetUser(r, models.AnonymousUser)
+			next.ServeHTTP(w, r)
+			return
+		}
+		
+		headerParts := strings.Split(authHeader, " ")
+		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+		
+		token := headerParts[1]
+		v := validator.New()
+		if models.ValidateTokenPlaintext(v, token); !v.Valid() {
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+		
+		user, err := app.models.Users.GetForToken(models.ScopeAuthentication, token)
+		if err != nil {
+			switch {
+			case errors.Is(err, models.ErrRecordNotFound):
+				app.invalidAuthenticationTokenResponse(w, r)
+			default:
+				app.serverErrorResponse(w, r, err)
+			}
+			return
+		}
+
+		r = app.contextSetUser(r, user)
 		next.ServeHTTP(w, r)
 	})
 }
