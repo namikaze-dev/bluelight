@@ -37,7 +37,17 @@ func (app *application) serve() error {
 		// context with 5s deadline incase the graceful shutdown failed
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		shutdownErr <- srv.Shutdown(ctx)
+
+		err := srv.Shutdown(ctx)
+		if err != nil {
+			shutdownErr <- err
+		}
+
+		app.logger.PrintInfo("completing background tasks", map[string]string{
+			"addr": srv.Addr,
+		})
+		app.wg.Wait()
+		shutdownErr <- nil
 	}()
 
 	app.logger.PrintInfo("starting server", map[string]string{
@@ -49,7 +59,7 @@ func (app *application) serve() error {
 	if !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
-	
+
 	err = <-shutdownErr
 	if err != nil {
 		return err
