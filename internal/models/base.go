@@ -13,6 +13,7 @@ var (
 
 type Models struct {
 	Tokens TokenModel
+	Permissions PermissionModel
 	Movies interface {
 		Insert(movie *Movie) error
 		Get(id int64) (*Movie, error)
@@ -33,6 +34,7 @@ func NewModels(db *sql.DB) *Models {
 		Movies: &MovieModel{DB: db},
 		Users: UserModel{DB: db},
 		Tokens: TokenModel{DB: db},
+		Permissions: PermissionModel{DB: db},
 	}
 }
 
