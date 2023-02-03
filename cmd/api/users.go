@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/namikaze-dev/bluelight/internal/models"
 	"github.com/namikaze-dev/bluelight/internal/validator"
@@ -50,9 +51,21 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// send welcome email asynchronously
+	// New generates and inserts a new token to db
+	token, err := app.models.Tokens.New(user.ID, 3*24*time.Hour, models.ScopeActivation)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// send email asynchronously
 	app.background(func() {
-		err = app.mailer.Send(user.Email, "user_welcome.html", user)
+		data := map[string]interface{}{
+			"activationToken": token.Plaintext,
+			"userID":          user.ID,
+		}
+		
+		err = app.mailer.Send(user.Email, "user_welcome.html", data)
 		if err != nil {
 			app.logger.PrintError(err, nil)
 		}
