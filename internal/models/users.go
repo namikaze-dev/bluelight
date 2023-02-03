@@ -16,6 +16,12 @@ var (
 	pgDupRecordErr    = `pq: duplicate key value violates unique constraint "users_email_key"`
 )
 
+var AnonymousUser = &User{}
+
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
+}
+
 type User struct {
 	ID        int64     `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
