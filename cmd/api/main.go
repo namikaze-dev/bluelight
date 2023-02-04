@@ -18,9 +18,11 @@ import (
 	"github.com/namikaze-dev/bluelight/internal/models"
 )
 
-const version = "1.0.0"
-// BuildTime variable to hold the executable binary build time.
-var buildTime string
+// BuildTime variables to hold the executable binary build time and version number.
+var (
+	buildTime string
+	version   string
+)
 
 type config struct {
 	port int
