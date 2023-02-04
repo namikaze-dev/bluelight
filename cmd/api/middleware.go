@@ -4,7 +4,6 @@ import (
 	"errors"
 	"expvar"
 	"fmt"
-	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,6 +11,7 @@ import (
 	"time"
 
 	"github.com/felixge/httpsnoop"
+	"github.com/tomasen/realip"
 	"github.com/namikaze-dev/bluelight/internal/models"
 	"github.com/namikaze-dev/bluelight/internal/validator"
 	"golang.org/x/time/rate"
@@ -60,11 +60,8 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if app.config.limiter.enabled {
-			ip, _, err := net.SplitHostPort(r.RemoteAddr)
-			if err != nil {
-				app.serverErrorResponse(w, r, err)
-				return
-			}
+			// Use the realip.FromRequest() function to get the client's real IP address.
+			ip := realip.FromRequest(r)
 
 			mu.Lock()
 			if _, found := clients[ip]; !found {
@@ -207,12 +204,12 @@ func (app *application) metrics(next http.Handler) http.Handler {
 	totalResponsesSent := expvar.NewInt("total_responses_sent")
 	totalProcessingTimeMicroseconds := expvar.NewInt("total_processing_time_μs")
 	totalResponsesSentByStatus := expvar.NewMap("total_responses_sent_by_status")
-	
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		totalRequestsReceived.Add(1)
-	
+
 		metrics := httpsnoop.CaptureMetrics(next, w, r)
-	
+
 		totalResponsesSent.Add(1)
 
 		totalProcessingTimeMicroseconds.Add(metrics.Duration.Microseconds())
