@@ -9,8 +9,8 @@ bluelight allows you to manage a movie library with CRUD endpoints, including ad
 - Sort movies by title, year, rating, and popularity
 - Filter movies by rating, genre, and language
 - Pagination for movie results
+- Permission based authorization
 - IP-based rate limiting to prevent abuse
-- Supports JSON and XML formats
 
 ## Technologies Used
 
